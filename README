@@ -1,10 +1,35 @@
-Your name and student ID
-o Section I: section on how to compile (if applicable) and execute your code. Include clear
-easy-to-follow step by step that the course staff can follow
-o Section II: section on test results. A test case will be provided along with the expected output.
-This test case will help you testing your code. In the Readme.txt file state which of the test
-case commands is successfully working and which ones are failing. This will help the course
-staff to better test your code and give you fair grades
-o Section III: section describes any design decisions that you do beyond the design guidelines
-given in this document. For example, any additional variables or methods or classes that you
-add
+Phuong Tran
+Student ID: 901007688
+
+### Section I:
+Run `java Main.java <num of frames in the pool>`  
+I'm running on Java version 27.
+
+The commands follow what was outlined in the project requirements, and you can CTRL-C or type "exit" to stop the program.
+
+### Section II:
+All of them are successful. It just doesn't print the output in the same format as the provided test case (like on one line with semicolons separating it). I have mine on different lines and I also have an additional text-based representation of the buffer pool to see what frames are filled and with what. Like so:
+```
+----
+FILE 5 | FILE 3 | FILE 2 | 
+get 10
+Evicted file 3 from Frame 2
+"F01-Rec010, Tim Boe, 09 Deer Dr, age009
+Brought file 1 from disk
+In Frame 2
+```
+
+"Get 10" is the command the user typed in.
+
+### Section III:
+I added a bunch of helper functions in the BufferPool class. In addition to the GET/SET/PIN/UNPIN functions, I have one that searches for the specific block in the pool, retrieves the content of a given block, searches for an empty frame, evicts a frame from a full buffer pool, and adds a frame to the buffer pool. I also have the text-based display of the buffer pool and a function that increases the clock hand.
+
+All of the function I just described (besides the text-based display one) were reusable in other parts of the code and its purpose was modular enough that I could make it into its own function. The clock hand one was mainly for clarify in the code, because I found that it was difficult for me to keep track of the looping with the clock hand when it reaches the end of the array, so instead of doing it manually when I increase the hand, I made it into a function.
+
+Also, the separate functions allow for more clarify in the code so it's not 4 giant functions. 
+
+In the Frame class, I have an empty constructor and one where you can put in parameters. The empty one is for the first initialization when the buffer pool first makes its buffer. The one with parameters is when we're adding a new frame into the buffer and we already know its contents.
+
+In the Main class, I allowed for lower case user inputs ("get" vs "GET") because I was too lazy to constantly be typing in upper case when I was debugging it.
+
+Everything is really in the BufferPool class.
