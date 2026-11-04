@@ -10,18 +10,20 @@ public class Main {
             numOfFrames = Integer.parseInt(args[0]);
         } else {
             System.out.print("Enter the number of frames you want in the buffer pool: ");
-            numOfFrames = Integer.parseInt(scanner.nextLine().trim());
+            numOfFrames = Integer.parseInt(scanner.nextLine());
         }
         
         // initialize the buffer
         BufferPool buffPool = new BufferPool(numOfFrames);
+        System.out.println("Type 'exit' to quit");
 
         while (true) {
-            System.out.println("Waiting for user input... type 'exit' to quit");
-            String userInput = scanner.nextLine();
-            String userCmd = userInput.trim().toUpperCase();
+            System.out.println("\n ----");
+            buffPool.showBuffer();
 
-            if (userInput.equals("EXIT")) {
+            String userInput = scanner.nextLine();
+
+            if (userInput.equalsIgnoreCase("EXIT")) {
                 break;
             }
             
@@ -34,9 +36,10 @@ public class Main {
             // [0]: command like GET, SET, PIN, UNPIN
             // [1]: k or BID
             // [2]: for SET -- the new content
+            String userCmd = userInput.stripLeading();
             String[] cmd = userCmd.split(" ", 3);
 
-            switch (cmd[0]){
+            switch (cmd[0].toUpperCase()){
                 case "GET": //GET k
                     buffPool.GET(Integer.parseInt(cmd[1]));
                     break;

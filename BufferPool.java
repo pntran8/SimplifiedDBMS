@@ -63,9 +63,14 @@ public class BufferPool {
         }
 
         //frame should be in memory now
-        System.out.println("Record: " + buffers[frameNum].getRecord(recInBlock));
-        System.out.println("I/O done: " + isIO);
-        System.out.println("Frame #: " + (frameNum + 1));
+        System.out.println(buffers[frameNum].getRecord(recInBlock));
+        if (isIO) {
+            System.out.println("Brought file " + blockId + " from disk");
+        } else {
+            System.out.println("File " + blockId + " already in memory");
+        }
+
+        System.out.println("In Frame " + (frameNum + 1));
     }
 
     /**
@@ -86,6 +91,7 @@ public class BufferPool {
                 isIO = true; //we had to write the block into memory
             } catch (Exception e) { //every frame is pinned
                 System.out.println(e.getMessage());
+                System.out.println("Write was unsuccessful.");
                 return;
             }
             frameNum = searchBlock(blockId); //since we had to add it to memory, where is the ACTUAL frameNum for it
@@ -95,8 +101,12 @@ public class BufferPool {
 
         //frame should be in memory now
         System.out.println("Write was successful");
-        System.out.println("I/O done: " + isIO);
-        System.out.println("Frame #: " + (frameNum + 1));
+        if (isIO) {
+            System.out.println("Brought File " + blockId + " from disk");
+        } else {
+            System.out.println("File " + blockId + " already in memory");
+        }
+        System.out.println("In Frame " + (frameNum + 1));
     }
 
     /**
@@ -120,10 +130,14 @@ public class BufferPool {
         buffers[frameNum].setPinned(true);
 
         //frame should be in memory now
-        System.out.println("Frame #: " + (frameNum + 1));
-        System.out.println("Pinned flag was " + ((alreadyPinned) ? "already " + alreadyPinned : "previously " + alreadyPinned));
+        System.out.println("File " + blockId + " pinned in Frame " + (frameNum + 1));
+        System.out.println(alreadyPinned ? "Already pinned" : "Not already pinned");
     }
 
+    /**
+     * Unpins a specific block (BID) in memory
+     * @param blockId   The target block to unpin
+     */
     public void UNPIN(int blockId) {
         int frameNum = searchBlock(blockId); //the frame number in the buffer array
 
@@ -131,11 +145,11 @@ public class BufferPool {
             System.out.println("The corresponding block " + blockId + " cannot be unpinned because it is not in memory.");
             return;
         } else {
-            boolean alreadyPinned = buffers[frameNum].isPinned(); 
+            boolean alreadyUnpinned = !(buffers[frameNum].isPinned()); //was the flag already false before we touched it
             buffers[frameNum].setPinned(false);
 
-            System.out.println("Frame #: " + (frameNum + 1));
-            System.out.println("Pinned flag was " + ((!alreadyPinned) ? "already " + !alreadyPinned : "previously " + alreadyPinned));
+            System.out.println("File " + blockId + " unpinned in Frame " + (frameNum + 1));
+            System.out.println(alreadyUnpinned ? "Already unpinned" : "Not already unpinned");        
         }
     }
 
@@ -191,7 +205,7 @@ public class BufferPool {
      * Searches for an empty frame. If none, then run eviction policy to get an empty frame
      * @return  A number in the buffers array for an empty frame
      */
-    public int getEmptyFrame(int blockId) {
+    public int getEmptyFrame(int blockId) throws Exception {
         for (int i = 0; i < buffers.length; i++){
             if (buffers[i].getBlockId() == -1) {
                 // if this frame's block ID is -1, then it's empty
@@ -208,7 +222,7 @@ public class BufferPool {
      * Evicts a frame with a policy similar to clock replacement but without the second chance bit
      * @return  The index of the evicted frame, which is now empty
      */
-    public int evictFrame(int blockId) {
+    public int evictFrame(int blockId) throws Exception {
         //basically, if this frame isn't pinned then evict it lol
         int evictedFrame = -1;
         int originalHandPos = clockHand; //the original hand position so we don't keep looping forever
@@ -231,18 +245,16 @@ public class BufferPool {
         if (evictedFrame != -1) {
             if (buffers[evictedFrame].isDirty()) { //if it's true, need to write back to disk
                 // write to the file
-                Path path = Paths.get("Project1/F" + evictedFrame + ".txt");
+                Path path = Paths.get("Project1/F" + buffers[evictedFrame].getBlockId() + ".txt");
 
                 try {
                     Files.write(path, buffers[evictedFrame].getContent());
-                    //System.out.println("Contents written back to disk successfully");
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    throw new Exception("Could not write contents to disk.");
                 }
-
             }
+            System.out.println("Evicted file " + buffers[evictedFrame].getBlockId() + " from Frame " + (evictedFrame + 1));
         }
-
         return evictedFrame;
     }
 
@@ -257,15 +269,34 @@ public class BufferPool {
         if (emptyFrame == -1) {
             throw new Exception("The corresponding block #" + blockId + " cannot be accessed from disk because the memory buffers are full.");
         } else { //yes empty frame available
-            Path path = Paths.get("/Project1/F" + blockId + ".txt");
+            Path path = Paths.get("Project1/F" + blockId + ".txt");
 
             try {
                 String newContent = Files.readString(path); //write that block in the memory 
                 buffers[emptyFrame] = new Frame(false, false, blockId, newContent);
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new Exception("Could not read block #" + blockId + " from disk.");
             }
         }
         //System.out.println("I think we did it??? let's see");
+    }
+
+    /**
+     * Visually displays the blocks in the buffer pool
+     */
+    public void showBuffer() {
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < buffers.length; i++) {
+            int blockId = buffers[i].getBlockId();
+
+            if (blockId == -1) { //empty frame
+                sb.append("-1 | ");
+            } else { //frame holds a block
+                sb.append("FILE ").append(blockId).append(" | ");
+            }
+        }
+
+        System.out.println(sb.toString());
     }
 }
