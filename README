@@ -1,0 +1,10 @@
+Your name and student ID
+o Section I: section on how to compile (if applicable) and execute your code. Include clear
+easy-to-follow step by step that the course staff can follow
+o Section II: section on test results. A test case will be provided along with the expected output.
+This test case will help you testing your code. In the Readme.txt file state which of the test
+case commands is successfully working and which ones are failing. This will help the course
+staff to better test your code and give you fair grades
+o Section III: section describes any design decisions that you do beyond the design guidelines
+given in this document. For example, any additional variables or methods or classes that you
+add
