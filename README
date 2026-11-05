@@ -30,6 +30,6 @@ Also, the separate functions allow for more clarify in the code so it's not 4 gi
 
 In the Frame class, I have an empty constructor and one where you can put in parameters. The empty one is for the first initialization when the buffer pool first makes its buffer. The one with parameters is when we're adding a new frame into the buffer and we already know its contents.
 
-In the Main class, I allowed for lower case user inputs ("get" vs "GET") because I was too lazy to constantly be typing in upper case when I was debugging it.
+In the Main class, I allowed for lower case user inputs ("get" vs "GET") just for ease of use when I was debugging.
 
 Everything is really in the BufferPool class.

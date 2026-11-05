@@ -19,7 +19,7 @@ public class Main {
 
         while (true) {
             System.out.println("\n ----");
-            buffPool.showBuffer();
+            //buffPool.showBuffer();
 
             String userInput = scanner.nextLine();
 
